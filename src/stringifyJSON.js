@@ -5,18 +5,11 @@
 
 var stringifyJSON = function(obj) {
   //primitive
-  if (typeof obj === 'number') {
-    return obj.toString();
+  if (obj === undefined || typeof obj === 'function') {
+    return undefined;
   }
-  if (typeof obj === 'boolean') {
-    if (obj === true) {
-      return 'true';
-    } else {
-      return 'false';
-    }
-  }
-  if (obj === null) {
-    return 'null';
+  if (typeof obj === 'number' || typeof obj === 'boolean' || obj === null) {
+    return `${obj}`;
   }
   if (typeof obj === 'string') {
     return `"${obj}"`;
@@ -25,10 +18,19 @@ var stringifyJSON = function(obj) {
   if (Array.isArray(obj)) {
     var results = '[';
     for (var i = 0; i < obj.length; i++) {
-      if (i === obj.length-1) {
-        results += stringifyJSON(obj[i]);
+      // if element is not a function or undefined
+      if (obj[i] !== undefined && typeof obj[i] !== 'function') {
+        if (i === obj.length-1) {
+          results += stringifyJSON(obj[i]);
+        } else {
+          results += stringifyJSON(obj[i]) + ',';
+        }
       } else {
-        results += stringifyJSON(obj[i]) + ',';
+        if (i === obj.length-1) {
+          results += 'null';
+        } else {
+          results += 'null,';
+        }
       }
     }
     results += ']';
@@ -39,10 +41,14 @@ var stringifyJSON = function(obj) {
     var results = '{';
     var keys = Object.keys(obj);
     for (var i = 0; i < keys.length; i++) {
-      if (i === keys.length - 1) {
-        results += stringifyJSON(keys[i]) + ':' + stringifyJSON(obj[keys[i]]);
+      if (obj[keys[i]] === undefined || typeof obj[keys[i]] === 'function') {
+        continue;
       } else {
-        results += stringifyJSON(keys[i]) + ':' + stringifyJSON(obj[keys[i]]) + ',';
+        if (i !== keys.length-1 && (obj[keys[i+1]] !== undefined && typeof obj[keys[i+1]] !== 'function')) {
+          results += stringifyJSON(keys[i]) + ':' + stringifyJSON(obj[keys[i]]) + ',';
+        } else {
+          results += stringifyJSON(keys[i]) + ':' + stringifyJSON(obj[keys[i]]);
+        }
       }
     }
     results += '}';
@@ -50,7 +56,13 @@ var stringifyJSON = function(obj) {
   }
 }
 
-var object = {'a': 1, 'b': 2, 'c': [3, 4, 5]};
+var fun = function(name) {
+  return name;
+}
 
-console.log(JSON.stringify(object));
-console.log(stringifyJSON(object));
+var obj = {'a': 1, 'b': fun, 'c': undefined};
+
+console.log(stringifyJSON(obj));
+
+console.log(JSON.stringify(undefined));
+console.log(stringifyJSON(undefined));
