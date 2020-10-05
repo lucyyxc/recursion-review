@@ -55,14 +55,3 @@ var stringifyJSON = function(obj) {
     return results;
   }
 }
-
-var fun = function(name) {
-  return name;
-}
-
-var obj = {'a': 1, 'b': fun, 'c': undefined};
-
-console.log(stringifyJSON(obj));
-
-console.log(JSON.stringify(undefined));
-console.log(stringifyJSON(undefined));
